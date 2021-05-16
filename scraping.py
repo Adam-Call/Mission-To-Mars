@@ -18,7 +18,7 @@ def scrape_all():
         'news_paragraph': news_paragraph,
         'featured_image': featured_image(browser),
         'facts': mars_facts(),
-        'last_modified': dt.dt.datetime.now()
+        'last_modified': dt.datetime.now()
     }
 
     #stop webdriver and return data
