@@ -5,25 +5,10 @@ from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
 import datetime as dt
 
-def scrape_all():
-    # Set up Splinter
-    executable_path = {'executable_path': ChromeDriverManager().install()}
-    browser = Browser('chrome', **executable_path, headless=True)
-    
-    news_title, news_paragraph = mars_news(browser)
+executable_path = {'executable_path': ChromeDriverManager().install()}
+browser = Browser('chrome', **executable_path, headless=True)
 
-    #run all scraping functions and store results in a dictionary
-    data = {
-        'news_title': news_title,
-        'news_paragraph': news_paragraph,
-        'featured_image': featured_image(browser),
-        'facts': mars_facts(),
-        'last_modified': dt.datetime.now()
-    }
 
-    #stop webdriver and return data
-    browser.quit()
-    return data
 
 #News and title function
 def mars_news(browser):
@@ -92,6 +77,54 @@ def mars_facts():
 
     #Convert back to html
     return df.to_html(classes='table table-striped')
+
+## mars hemispheres function
+
+def mars_hemisphere(browser):
+    url = 'https://marshemispheres.com/'
+    browser.visit(url)
+    html = browser.html
+    
+    # 2. Create a list to hold the images and titles.
+    hemisphere_image_urls = []
+
+    # 3. Write code to retrieve the image urls and titles for each hemisphere.
+    links = browser.find_by_css('h3')
+    for link in links:
+        hemisphere = {}
+        try:
+            browser.find_by_tag('h3').click()           
+            hemisphere['title'] = browser.find_by_css('h2.title').text
+            img_url = browser.find_by_tag('img')[4]
+            hemisphere['img_url'] = img_url['src']
+        except: 
+            print('stale element')
+        hemisphere_image_urls.append(hemisphere)
+        browser.back()
+    return hemisphere_image_urls
+
+
+def scrape_all():
+    # Set up Splinter
+    executable_path = {'executable_path': ChromeDriverManager().install()}
+    browser = Browser('chrome', **executable_path, headless=True)
+    
+    news_title, news_paragraph = mars_news(browser)
+    
+
+    #run all scraping functions and store results in a dictionary
+    data = {
+        'news_title': news_title,
+        'news_paragraph': news_paragraph,
+        'featured_image': featured_image(browser),
+        'facts': mars_facts(),
+        'hemispheres': mars_hemisphere(browser),
+        'last_modified': dt.datetime.now()
+    }
+
+    #stop webdriver and return data
+    browser.quit()
+    return data
 
 if __name__ == '__main__':
     #if running as script, print scraped data
